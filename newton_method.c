@@ -98,11 +98,9 @@ void main(){
     while(norma(jacobiana)>e && it<itMax){
         d[0][0]=(-1)*(invH[0][0]*jacobiana[0][0]+invH[0][1]*jacobiana[1][0]);
         d[1][0]=(-1)*(invH[1][0]*jacobiana[0][0]+invH[1][1]*jacobiana[1][0]);
-
-        
+            
          x+=d[0][0];
          y+=d[1][0];
-
 
         jac();
         hess();

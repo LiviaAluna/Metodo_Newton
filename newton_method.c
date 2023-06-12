@@ -1,142 +1,115 @@
 #include<stdio.h>
 #include<math.h>
-#define H 0.000001
 #define N 2
-#define M 4
 #define O 1
+
+double hessiana[N][N],jacobiana[N][O],invH[N][N],adjHes[N][N],x, y,e=0.0001, h=0.00000001,d[N][O];
 
 double funcao(double x, double y){
     double f; 
     f=x*x+y*y;
     return f;
 }
-
 double derX(double x, double y){
     double dx;
-    dx=(funcao(x+H,y)-funcao(x,y))/H;
+    dx=(funcao(x+h, y)-funcao(x-h,y))/(2*h);
     return dx;
 }
 double derY(double x, double y){
     double dy;
-    dy=(funcao(x,y+H)-funcao(x,y))/H;
+    dy=(funcao(x,y+h)-funcao(x,y-h))/(2*h);
     return dy;
 }
 double derX2(double x, double y){
     double dxx;
-    dxx=(funcao(x+H,y)-2*funcao(x,y)+funcao(x-H,y))/(H*H);
+    dxx=(funcao(x+h,y)-2*funcao(x,y)+funcao(x-h,y))/(h*h);
     return dxx;
 }
 double derY2(double x, double y){
     double dyy;
-    dyy=(funcao(x,y+H)-2*funcao(x,y)+funcao(x,y-H))/(H*H);
+    dyy=(funcao(x,y+h)-2*funcao(x,y)+funcao(x,y-h))/(h*h);
     return dyy;
 }
 double derXY(double x, double y){
     double dxy;
-    dxy=(funcao(x+H,y+H)-funcao(x+H,y-H)-funcao(x-H,y+H)+funcao(x-H,y-H))/(4*(H*H));
+    dxy=(funcao(x+h,y+h)-funcao(x+h,y-h)-funcao(x-h,y+h)+funcao(x-h,y-h))/(4*(h*h));
     return dxy;
 }
-void multMatrix(double A[][N], double B[][N], double C[][N])
-{
-    // Percorre as linhas de A
-    for (int i = 0; i < N; i++){
-        // Percorre as linhas de B
-        for (int j = 0; j < N; j++){
-            C[i][j] = 0.0;
-            // Percorre a linha de A e a coluna de B
-            for(int k = 0; k < N; k++){
-                C[i][j] += A[i][k] * B[k][j];
-            }
-        }
-    }
-}
-
-void printMatrix(double matrix[][N]) {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            printf("%.1f\t", matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void main(){
-    double x = 2, y= 2;
-//Matriz Jacobiana
-
-    double jac[N][O];
-    jac[0][0]=derX(x,y);
-    jac[1][0]=derY(x,y);
-    printf("\nmatriz jacobiana:\n%.1f, %.1f\n", jac[0][0],jac[1][0]);
-
-//Norma Vetorial
-
-    double soma = 0.0;
-    for(int i = 0; i < N; i++){    
-    soma +=jac[i][0]*jac[i][0];
-    
-    }
-
-    double norma = sqrt(soma);
-
-    printf("norma vetorial=%.1f\n", norma);
-
-//Matriz Hessiana
-
-    double hes[N][N];
-    hes[0][0]=derX2(x,y);
-    hes[0][1]=derXY(x,y);
-    hes[1][0]=derXY(x,y);
-    hes[1][1]=derY2(x,y); 
-    printf("\nmatriz hessiana:\n%.1f  %.1f\n%.1f  %.1f\n", hes[0][0], hes[0][1], hes[1][0], hes[1][1]);
-
-//Matriz inversa da Hessiana
-    double d,adjHes[2][2];
+void invhess(){
+    double det,adjHes[N][N];
     int i,j;
-    double invHes[2][2];
+    double invHes[N][N];
 
     /* Calcular o determinante da matriz A */
-    d = (hes[0][0]*hes[1][1])-(hes[0][1]*hes[1][0]);
-    if(d==0)
+    det = (hessiana[0][0]*hessiana[1][1])-(hessiana[0][1]*hessiana[1][0]);
+    if(det==0)
     {
-        printf("Determinante 0");
         return 0;
     }
      /* Encontrar adjHes */
-    adjHes[0][0]=hes[1][1];
-    adjHes[1][1]=hes[0][0];
-    adjHes[0][1]=-hes[0][1];
-    adjHes[1][0]=-hes[1][0];
+    adjHes[0][0]=hessiana[1][1];
+    adjHes[1][1]=hessiana[0][0];
+    adjHes[0][1]=-hessiana[0][1];
+    adjHes[1][0]=-hessiana[1][0];
 
     /* Encontrar matriz inversa*/
-    printf("Matriz inversa da hessiana: \n");
     for(i=0;i<2;i++)
     {
         for(    j=0;j<2;j++)
         {
-            invHes[i][j]=(adjHes[i][j])/d;
+            invH[i][j]=(adjHes[i][j])/det;
         }
     }
-    for(i=0;i<2;i++)
-    {
-        for(j=0;j<2;j++)
-        {
-            printf("%.1f ",invHes[i][j]);
-        }
-        printf("\n");
-    }
+}
+void hess(){
+    hessiana[0][0]=derX2(x,y);
+    hessiana[0][1]=derXY(x,y);
+    hessiana[1][0]=derXY(x,y);
+    hessiana[1][1]=derY2(x,y);
+}
+void jac(){
+    jacobiana[0][0]=derX(x,y);
+    jacobiana[1][0]=derY(x,y);
+}
+double norma(double x[][O]){
+    int i;
+    double acum= 0;
 
-//multiplicação das matrizes
-   double resultMult[N][O];
-   multMatrix(invHes,jac,resultMult);
-   printf("Multiplicacao entre matriz hessiana inversa e matriz jacobiana:\n");
-   for(i=0;i<2;i++)
-    {
-        for(j=0;j<1;j++)
-        {
-            printf("%.1f ",resultMult[i][j]);
-        }
-        printf("\n");
+    for(i=0; i<N; i++){
+        acum+=x[i][O]*x[i][O];
+    }
+    acum=sqrt(acum);
+
+    return acum;
+}
+void main(){
+    x = 1.0; y= 1.0;
+    int i, j, it=0, itMax=100;
+    jac();
+    //imprimir jacobiana(gradiente) na tela
+    for(i=0;i<N;i++) for(j=0;j<O;j++) printf("jacobiana[%d][%d]=%f\n",i,j, jacobiana[i][j]);
+    //imprimir hessiana na tela
+    hess();
+    for(i=0;i<N;i++) for(j=0; j<N;j++) printf("H[%d][%d]=%f\n",i,j, hessiana[i][j]);
+    //Printar a matriz hessiana inversa
+    invhess();
+    for(i=0;i<N;i++) for(j=0; j<N;j++) printf("invH[%d][%d]=%f\n",i,j, invH[i][j]);
+    //Encontrar o minimo
+    while(norma(jacobiana)>e && it<itMax){
+        d[0][0]=(-1)*(invH[0][0]*jacobiana[0][0]+invH[0][1]*jacobiana[1][0]);
+        d[1][0]=(-1)*(invH[1][0]*jacobiana[0][0]+invH[1][1]*jacobiana[1][0]);
+
+        
+         x+=d[0][0];
+         y+=d[1][0];
+
+
+        jac();
+        hess();
+        invhess();
+
+       printf("interacao = %d \t f(%f)(%f)=%f\n",it, x,y, funcao(x, y));
+    it++;
     }
 
 }

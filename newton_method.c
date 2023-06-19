@@ -38,7 +38,6 @@ double derXY(double x, double y){
 void invhess(){
     double det,adjHes[N][N];
     int i,j;
-    double invHes[N][N];
 
     /* Calcular o determinante da matriz A */
     det = (hessiana[0][0]*hessiana[1][1])-(hessiana[0][1]*hessiana[1][0]);
@@ -53,9 +52,9 @@ void invhess(){
     adjHes[1][0]=-hessiana[1][0];
 
     /* Encontrar matriz inversa*/
-    for(i=0;i<2;i++)
+    for(i=0;i<N;i++)
     {
-        for(    j=0;j<2;j++)
+        for(j=0;j<N;j++)
         {
             invH[i][j]=(adjHes[i][j])/det;
         }

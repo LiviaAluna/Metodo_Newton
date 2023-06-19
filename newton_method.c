@@ -72,14 +72,14 @@ void jac(){
 }
 double norma(double x[][O]){
     int i;
-    double acum= 0;
+    double soma=0;
 
     for(i=0; i<N; i++){
-        acum+=x[i][O]*x[i][O];
+        soma+=x[i][O]*x[i][O];
     }
-    acum=sqrt(acum);
+    soma=sqrt(soma);
 
-    return acum;
+    return soma;
 }
 void main(){
     x = 1.0; y= 1.0;
@@ -108,5 +108,4 @@ void main(){
        printf("interacao = %d \t f(%f)(%f)=%f\n",it, x,y, funcao(x, y));
     it++;
     }
-
 }

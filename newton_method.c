@@ -3,11 +3,12 @@
 #define N 2
 #define O 1
 
-double hessiana[N][N],jacobiana[N][O],invH[N][N],adjHes[N][N],x, y,e=0.0001, h=0.00000001,d[N][O];
+double hessiana[N][N],jacobiana[N][O],invH[N][N],adjHes[N][N],x, y,e=0.0001, h=0.0001 ,d[N][O];
 
 double funcao(double x, double y){
     double f; 
-    f=x*x+y*y;
+    //f=3*(x*x)*y;
+    f=((1-x)*(1-x))+100*((y-(x*x))*(y-(x*x)));
     return f;
 }
 double derX(double x, double y){
@@ -38,6 +39,7 @@ double derXY(double x, double y){
 void invhess(){
     double det,adjHes[N][N];
     int i,j;
+    double invHes[N][N];
 
     /* Calcular o determinante da matriz A */
     det = (hessiana[0][0]*hessiana[1][1])-(hessiana[0][1]*hessiana[1][0]);
@@ -54,7 +56,7 @@ void invhess(){
     /* Encontrar matriz inversa*/
     for(i=0;i<N;i++)
     {
-        for(j=0;j<N;j++)
+        for(    j=0;j<N;j++)
         {
             invH[i][j]=(adjHes[i][j])/det;
         }
@@ -72,14 +74,14 @@ void jac(){
 }
 double norma(double x[][O]){
     int i;
-    double soma=0;
+    double acum= 0;
 
     for(i=0; i<N; i++){
-        soma+=x[i][O]*x[i][O];
+        acum+=x[i][O]*x[i][O];
     }
-    soma=sqrt(soma);
+    acum=sqrt(acum);
 
-    return soma;
+    return acum;
 }
 void main(){
     x = 1.0; y= 1.0;
@@ -108,4 +110,5 @@ void main(){
        printf("interacao = %d \t f(%f)(%f)=%f\n",it, x,y, funcao(x, y));
     it++;
     }
+   
 }
